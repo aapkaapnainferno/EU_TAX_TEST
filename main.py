@@ -1,6 +1,9 @@
 import streamlit as st
 from dateutil.relativedelta import relativedelta
-from datetime import datetime
+import openpyxl
+import requests
+import streamlit as st
+from streamlit_lottie import st_lottie
 # Page configuration
 st.set_page_config(
     page_title="EU Taxonomy",
@@ -10,9 +13,40 @@ st.set_page_config(
 )
 # Define a common background color
 bg_color = "#000C66"  # Adjust this color as needed
-# if 'field48' not in st.session_state:
-#     st.session_state.field48 = 0.0
+
 # CSS style for larger font size
+if 'field1' not in st.session_state:
+    st.session_state.field1 = ""
+if 'field2' not in st.session_state:
+    st.session_state.field2 = ""
+if 'field3' not in st.session_state:
+    st.session_state.field3 = ""
+if 'field4' not in st.session_state:
+    st.session_state.field4 = ""
+if 'field5' not in st.session_state:
+    st.session_state.field5 = ""
+if 'field9' not in st.session_state:
+    st.session_state.field9 = ""
+if 'field11' not in st.session_state:
+    st.session_state.field11 = ""
+if 'field16' not in st.session_state:
+    st.session_state.field16 = 0.0
+if 'field19' not in st.session_state:
+    st.session_state.field19 = 0.0
+if 'field32' not in st.session_state:
+    st.session_state.field32 = 0.0
+if 'field34' not in st.session_state:
+    st.session_state.field34 = 0.0
+if 'field37' not in st.session_state:
+    st.session_state.field37 = 0.0
+if 'field39' not in st.session_state:
+    st.session_state.field39 = 0.0
+if 'field44' not in st.session_state:
+    st.session_state.field44 = 0.0
+if 'field47' not in st.session_state:
+    st.session_state.field47 = 0.0
+if 'field60' not in st.session_state:
+    st.session_state.field60 = 0.0
 st.markdown(
     """
     <style>
@@ -108,19 +142,18 @@ if st.session_state.page == 'main':
             st.image("eu.jpg", width=100)
         
         st.markdown("# User Details")
-        field1 = ""
-        field2 = ""
-        field3 = ""
-        field4 = ""
-        field5 = ""
-        field1 = st.text_input("Username", key='field1', placeholder="Enter username")
-        field2 = st.text_input("Project", key='field2', placeholder="Enter project name")
-        field3 = st.text_input("Capacity", key='field3', placeholder="Enter capacity in m3/d")
-        field4 = st.text_input("Location", key='field4', placeholder="Enter location")
-        # field5 = st.text_input("Date", key='field5', placeholder="Enter date(DD/MM/YYYY)")
-        field5 = st.date_input("Date", key='field5')
+        # field1 = ""
+        # field2 = ""
+        # field3 = ""
+        # field4 = ""
+        # field5 = ""
+        st.session_state.field1 = st.text_input("Username", key='1', placeholder="Enter username")
+        st.session_state.field2 = st.text_input("Project", key='2', placeholder="Enter project name")
+        st.session_state.field3 = st.text_input("Capacity", key='3', placeholder="Enter capacity in m3/d")
+        st.session_state.field4 = st.text_input("Location", key='4', placeholder="Enter location")
+        st.session_state.field5 = st.date_input("Date", key='5')
 
-        if st.button('Next') and field1 != "" and field2 != "" and field3 != "" and field4 != "" and field5 != "":
+        if st.button('Next') and st.session_state.field1 != "" and st.session_state.field2 != "" and st.session_state.field3 != "" and st.session_state.field4 != "" and st.session_state.field5 != "":
             st.session_state['show_eligibility'] = True
 
     # Main content
@@ -267,7 +300,7 @@ if st.session_state.page == 'main':
                         '</div>', unsafe_allow_html=True)
                     answer7 = st.number_input('Enter your response (kWh/m3)1', min_value=0.0, max_value=100.0, step=0.01,label_visibility='collapsed')
             #2B
-            if (answer2 == "Yes" and (answer5 <= 1.5 and answer4 <= 0.5)) or (answer3 == "Yes"  and (answer6 >= 20 and answer7 >= 20)):
+            if (answer2 == "Yes" and (answer5 <= 1.5 and answer4 <= 0.5) and (answer5 != 0.0 and answer4 != 0.0)) or (answer3 == "Yes"  and (answer6 >= 20 and answer7 >= 20)):
                 with col2:
                     st.markdown(
                         f'<div style="background-color: {bg_color}; color: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; width: 100%;" class="big-font">'
@@ -466,10 +499,6 @@ if st.session_state.page == 'main':
         st.info("Please fill in all input fields to proceed with eligibility questions.")
 #Make changes for the next page here
 elif st.session_state.page == 'next_page':
-    field11 = 0
-    field16 = 0
-    field19 = 0
-    field32 = 0
     def custom_number_input(label, key, placeholder,value=0.0):
         return st.number_input(label, key=key, step=0.01,value=value,placeholder=placeholder)
     
@@ -499,25 +528,28 @@ elif st.session_state.page == 'next_page':
         f'<div style="background-color: {bg_color}; color: white; padding: 5px; border-radius: 15px; margin-bottom: 15px; width: 80%; text-align: center; font-size: 36px; margin-top: -50px;" class="center-text">'
         '<strong>Phase 1</strong>'
         '</div>', unsafe_allow_html=True)
-    field6 = custom_number_input("Exchange Rate - Phase 1", 'field6', "Enter")
-    field7 = custom_date_input("Construction Start Date - Phase 1", 'field7')
-    field8 = custom_number_input("Construction Period(in months) - Phase 1", 'field8', "Enter")
-    if field8 != 0:
-        st.write("Construction End Date: - Phase 1", calculate_future_date(field7,field8)) # TBC
-        field9 = calculate_future_date(field7,field8)
-    field10 = custom_number_input("Operations Period(in months) - Phase 1", 'field10', "Enter")
-    if field10 != 0:
-        field11 = st.write("Operations End Date: - Phase 1", calculate_future_date(field9,field10)) # TBC
-    field12 = custom_percentage_input("Debt Ratio (%) - Phase 1", 'field12', "Enter") 
-    field13 = custom_percentage_input("Equity Ratio (%) - Phase 1", 'field13', "Enter")
-    field14 = custom_percentage_input("Construction Interest Rate (Base Rate %) - Phase 1", 'field14', "Enter") 
-    field15 = custom_percentage_input("Construction Interest Rate (Margin Spread %) - Phase 1",'field15', "Enter")
-    if field14 != 0 and field15 != 0:
-        field16 = st.write("All in Rate (%)", field14 + field15) # TBC
-    field17 = custom_percentage_input("Operations Interest Rate (Base Rate %) - Phase 1",'field17', "Enter")
-    field18 = custom_percentage_input("Operations Interest Rate (Margin Spread %) - Phase 1",'field18', "Enter")
-    if field17 != 0 and field18 != 0:
-        field19 = st.write("All in Rate (%) - Phase 1", field17 + field18) # TBC
+    st.session_state.field6 = custom_number_input("Exchange Rate - Phase 1", '6', "Enter")
+    st.session_state.field7 = custom_date_input("Construction Start Date - Phase 1", '7')
+    st.session_state.field8 = custom_number_input("Construction Period(in months) - Phase 1", '8', "Enter")
+    if st.session_state.field8 != 0:
+        st.write("Construction End Date: - Phase 1", calculate_future_date(st.session_state.field7,st.session_state.field8)) # TBC
+        st.session_state.field9 = calculate_future_date(st.session_state.field7,st.session_state.field8)
+    st.session_state.field10 = custom_number_input("Operations Period(in months) - Phase 1", '10', "Enter")
+    if st.session_state.field10 != 0:
+        st.session_state.field11 = st.write("Operations End Date: - Phase 1", calculate_future_date(st.session_state.field9,st.session_state.field10)) # TBC
+        st.session_state.field11 = calculate_future_date(st.session_state.field9,st.session_state.field10)
+    st.session_state.field12 = custom_percentage_input("Debt Ratio (%) - Phase 1", '12', "Enter") 
+    st.session_state.field13 = custom_percentage_input("Equity Ratio (%) - Phase 1", '13', "Enter")
+    st.session_state.field14 = custom_percentage_input("Construction Interest Rate (Base Rate %) - Phase 1", '14', "Enter") 
+    st.session_state.field15 = custom_percentage_input("Construction Interest Rate (Margin Spread %) - Phase 1",'15', "Enter")
+    if st.session_state.field14 != 0 and st.session_state.field15 != 0:
+        st.write("All in Rate (%)", st.session_state.field14 + st.session_state.field15) # TBC
+        st.session_state.field16 = st.session_state.field14 + st.session_state.field15
+    st.session_state.field17 = custom_percentage_input("Operations Interest Rate (Base Rate %) - Phase 1",'17', "Enter")
+    st.session_state.field18 = custom_percentage_input("Operations Interest Rate (Margin Spread %) - Phase 1",'18', "Enter")
+    if st.session_state.field17 != 0 and st.session_state.field18 != 0:
+        st.write("All in Rate (%) - Phase 1", st.session_state.field17 + st.session_state.field18) # TBC
+        st.session_state.field19 = st.session_state.field17 + st.session_state.field18
     st.markdown("<br><br>", unsafe_allow_html=True)
     st.markdown(
         f'<div style="background-color: {bg_color}; color: white; padding: 5px; border-radius: 15px; margin-bottom: 15px; width: 80%; text-align: center; font-size: 36px; margin-top: -50px;" class="center-text">'
@@ -525,28 +557,25 @@ elif st.session_state.page == 'next_page':
         '</div>', unsafe_allow_html=True)
     col1, col2 = st.columns((1, 1))
     with col1:
-        field20 = custom_number_input("Construction Cost - Phase 1", 'field20',"Enter")
-        field21 = custom_number_input("Gross Availability - Phase 1", 'field21',"Enter")
-        field22 = custom_percentage_input("Availibility Factor (%) - Phase 1", 'field22',"Enter",95.0)
-        field23 = custom_percentage_input("Input to Output Ratio (%) - Phase 1", 'field23',"Enter",100.0)
-        field24 = custom_percentage_input("Leakage Ratio/Losses (%) - Phase 1", 'field24',"Enter",95.0)
-        field25 = custom_number_input("Labor Cost (EGP'000) - Phase 1", 'field25',"Enter")
-        field26 = custom_number_input("Maintenance Costs (EGP'000) - Phase 1", 'field26',"Enter")
+        st.session_state.field20 = custom_number_input("Construction Cost - Phase 1", '20',"Enter")
+        st.session_state.field21 = custom_number_input("Gross Availability - Phase 1", '21',"Enter")
+        st.session_state.field22 = custom_percentage_input("Availibility Factor (%) - Phase 1", '22',"Enter",95.0)
+        st.session_state.field23 = custom_percentage_input("Input to Output Ratio (%) - Phase 1", '23',"Enter",100.0)
+        st.session_state.field24 = custom_percentage_input("Leakage Ratio/Losses (%) - Phase 1", '24',"Enter",95.0)
+        st.session_state.field25 = custom_number_input("Labor Cost (EGP'000) - Phase 1", '25',"Enter")
+        st.session_state.field26 = custom_number_input("Maintenance Costs (EGP'000) - Phase 1", '26',"Enter")
     with col2:
-        field27 = custom_number_input("Environment & Performance Monitoring Costs (EGP'000) - Phase 1", 'field27',"Enter")
-        field28 = custom_number_input("Maintenance Cost (EGP'000) - Phase 1", 'field28',"Enter")
-        field29 = custom_number_input("Variable Cost (EGP'000) - Phase 1", 'field29',"Enter")
-        field30 = custom_number_input("Energy Consumption (KW/m³) - Phase 1", 'field30',"Enter")
-        field31 = custom_number_input("Energy Cost (EGP/KW) - Phase 1", 'field31',"Enter")
-        if field30 != 0 and field31 != 0:
-            field32 = st.write("Effective Price (EGP/m³) - Phase 1",field30*field31)
-        field33 = custom_number_input("RO Replacement Cost (EGP'000) - Phase 1", 'field33',"Enter")
+        st.session_state.field27 = custom_number_input("Environment & Performance Monitoring Costs (EGP'000) - Phase 1", '27',"Enter")
+        st.session_state.field28 = custom_number_input("Maintenance Cost (EGP'000) - Phase 1", '28',"Enter")
+        st.session_state.field29 = custom_number_input("Variable Cost (EGP'000) - Phase 1", '29',"Enter")
+        st.session_state.field30 = custom_number_input("Energy Consumption (KW/m³) - Phase 1", '30',"Enter")
+        st.session_state.field31 = custom_number_input("Energy Cost (EGP/KW) - Phase 1", '31',"Enter")
+        if st.session_state.field30 != 0 and st.session_state.field31 != 0:
+            st.write("Effective Price (EGP/m³) - Phase 1",st.session_state.field30*st.session_state.field31)
+            st.session_state.field32 = st.session_state.field30*st.session_state.field31
+        st.session_state.field33 = custom_number_input("RO Replacement Cost (EGP'000) - Phase 1", '33',"Enter")
     st.button("Continue", on_click=continue_to_next_page1)
 elif st.session_state.page == 'next_page1':
-    field34 = 0
-    field39 = 0
-    field44 = 0
-    field60 = 0
     def custom_number_input(label, key, placeholder,value=0.0):
         return st.number_input(label, key=key, step=0.01,value=value,placeholder=placeholder)
     
@@ -576,25 +605,27 @@ elif st.session_state.page == 'next_page1':
         f'<div style="background-color: {bg_color}; color: white; padding: 5px; border-radius: 15px; margin-bottom: 15px; width: 80%; text-align: center; font-size: 36px; margin-top: -50px;" class="center-text">'
         '<strong>Phase 2</strong>'
         '</div>', unsafe_allow_html=True)
-    # field34 = custom_number_input("Exchange Rate", 'field34', "Enter",0.0)
-    field35 = custom_date_input("Construction Start Date - Phase 2", 'field35')
-    field36 = custom_number_input("Construction Period(in months) - Phase 2", 'field36', "Enter",0.0)
-    if field36 != 0:
-        st.write("Construction End Date:", calculate_future_date(field35,field36)) # TBC
-        field37 = calculate_future_date(field35,field36)
-    field38 = custom_number_input("Operations Period(in months) - Phase 2", 'field38', "Enter",0.0)
-    if field38 != 0:
-        field39 = st.write("Operations End Date: - Phase 2", calculate_future_date(field37,field38)) # TBC
-    field40 = custom_percentage_input("Debt Ratio (%) - Phase 2", 'field40', "Enter",0.0) 
-    field41 = custom_percentage_input("Equity Ratio (%) - Phase 2", 'field41', "Enter",0.0)
-    field42 = custom_percentage_input("Construction Interest Rate (Base Rate %) - Phase 2", 'field42', "Enter",0.0) 
-    field43 = custom_percentage_input("Construction Interest Rate (Margin Spread %) - Phase 2",'field43', "Enter",0.0)
-    if field42 != 0 and field43 != 0:
-        field44 = st.write("All in Rate (%) - Phase 2", field42 + field43) # TBC
-    field45 = custom_percentage_input("Operations Interest Rate (Base Rate %) - Phase 2",'field45', "Enter",0.0)
-    field46 = custom_percentage_input("Operations Interest Rate (Margin Spread %) - Phase 2",'field46', "Enter",0.0)
-    if field45 != 0 and field46 != 0:
-        field47 = st.write("All in Rate (%) - Phase 2", field45 + field46) # TBC
+    st.session_state.field35 = custom_date_input("Construction Start Date - Phase 2", '35')
+    st.session_state.field36 = custom_number_input("Construction Period(in months) - Phase 2", '36', "Enter",0.0)
+    if st.session_state.field36 != 0:
+        st.write("Construction End Date:", calculate_future_date(st.session_state.field35,st.session_state.field36)) # TBC
+        st.session_state.field37 = calculate_future_date(st.session_state.field35,st.session_state.field36)
+    st.session_state.field38 = custom_number_input("Operations Period(in months) - Phase 2", '38', "Enter",0.0)
+    if st.session_state.field38 != 0:
+        st.write("Operations End Date: - Phase 2", calculate_future_date(st.session_state.field37,st.session_state.field38)) # TBC
+        st.session_state.field39 = calculate_future_date(st.session_state.field37,st.session_state.field38)
+    st.session_state.field40 = custom_percentage_input("Debt Ratio (%) - Phase 2", '40', "Enter",0.0) 
+    st.session_state.field41 = custom_percentage_input("Equity Ratio (%) - Phase 2", '41', "Enter",0.0)
+    st.session_state.field42 = custom_percentage_input("Construction Interest Rate (Base Rate %) - Phase 2", '42', "Enter",0.0) 
+    st.session_state.field43 = custom_percentage_input("Construction Interest Rate (Margin Spread %) - Phase 2",'43', "Enter",0.0)
+    if st.session_state.field42 != 0 and st.session_state.field43 != 0:
+        st.write("All in Rate (%) - Phase 2", st.session_state.field42 + st.session_state.field43) # TBC
+        st.session_state.field44 = st.session_state.field42 + st.session_state.field43
+    st.session_state.field45 = custom_percentage_input("Operations Interest Rate (Base Rate %) - Phase 2",'45', "Enter",0.0)
+    st.session_state.field46 = custom_percentage_input("Operations Interest Rate (Margin Spread %) - Phase 2",'46', "Enter",0.0)
+    if st.session_state.field45 != 0 and st.session_state.field46 != 0:
+        st.write("All in Rate (%) - Phase 2", st.session_state.field45 + st.session_state.field46) # TBC
+        st.session_state.field47 = st.session_state.field45 + st.session_state.field46
     st.markdown("<br><br>", unsafe_allow_html=True)
     st.markdown(
         f'<div style="background-color: {bg_color}; color: white; padding: 5px; border-radius: 15px; margin-bottom: 15px; width: 80%; text-align: center; font-size: 36px; margin-top: -50px;" class="center-text">'
@@ -602,23 +633,99 @@ elif st.session_state.page == 'next_page1':
         '</div>', unsafe_allow_html=True)
     col1, col2 = st.columns((1, 1))
     with col1:
-        field48 = custom_number_input("Construction Cost - Phase 2", 'field48',"Enter",0.0)
-        field49 = custom_number_input("Gross Availability - Phase 2", 'field49',"Enter",0.0)
-        field50 = custom_percentage_input("Availibility Factor (%) - Phase 2", 'field50',"Enter",95.0)
-        field51 = custom_percentage_input("Input to Output Ratio (%) - Phase 2", 'field51',"Enter",100.0)
-        field52 = custom_percentage_input("Leakage Ratio/Losses (%) - Phase 2", 'field52',"Enter",95.0)
-        field53 = custom_number_input("Labor Cost (EGP'000) - Phase 2", 'field53',"Enter",0.0)
-        field54 = custom_number_input("Maintenance Costs (EGP'000) - Phase 2", 'field54',"Enter",0.0)
+        st.session_state.field48 = custom_number_input("Construction Cost - Phase 2", '48',"Enter",0.0)
+        st.session_state.field49 = custom_number_input("Gross Availability - Phase 2", '49',"Enter",0.0)
+        st.session_state.field50 = custom_percentage_input("Availibility Factor (%) - Phase 2", '50',"Enter",95.0)
+        st.session_state.field51 = custom_percentage_input("Input to Output Ratio (%) - Phase 2", '51',"Enter",100.0)
+        st.session_state.field52 = custom_percentage_input("Leakage Ratio/Losses (%) - Phase 2", '52',"Enter",95.0)
+        st.session_state.field53 = custom_number_input("Labor Cost (EGP'000) - Phase 2", '53',"Enter",0.0)
+        st.session_state.field54 = custom_number_input("Maintenance Costs (EGP'000) - Phase 2", '54',"Enter",0.0)
     with col2:
-        field55 = custom_number_input("Environment & Performance Monitoring Costs (EGP'000) - Phase 2", 'field27',"Enter",0.0)
-        field56 = custom_number_input("Maintenance Cost (EGP'000) - Phase 2", 'field28',"Enter",0.0)
-        field57 = custom_number_input("Variable Cost (EGP'000) - Phase 2", 'field29',"Enter",0.0)
-        field58 = custom_number_input("Energy Consumption (KW/m³) - Phase 2", 'field58',"Enter",0.0)
-        field59 = custom_number_input("Energy Cost (EGP/KW) - Phase 2", 'field59',"Enter",0.0)
-        if field58 != 0 and field59 != 0:
-            field60 = st.write("Effective Price (EGP/m³) - Phase 2",field58*field59)
-        field61 = custom_number_input("RO Replacement Cost (EGP'000) - Phase 2", 'field33',"Enter",0.0)
-#     st.button("Continue", on_click=continue_to_next_page2)
-# elif st.session_state.page == 'next_page2':
-#     st.markdown("Dashboard", unsafe_allow_html=True)
-#     st.write("Exchange Rate:", st.session_state.field48)
+        st.session_state.field55 = custom_number_input("Environment & Performance Monitoring Costs (EGP'000) - Phase 2", '55',"Enter",0.0)
+        st.session_state.field56 = custom_number_input("Maintenance Cost (EGP'000) - Phase 2", '56',"Enter",0.0)
+        st.session_state.field57 = custom_number_input("Variable Cost (EGP'000) - Phase 2", '57',"Enter",0.0)
+        st.session_state.field58 = custom_number_input("Energy Consumption (KW/m³) - Phase 2", '58',"Enter",0.0)
+        st.session_state.field59 = custom_number_input("Energy Cost (EGP/KW) - Phase 2", '59',"Enter",0.0)
+        if st.session_state.field58 != 0 and st.session_state.field59 != 0:
+            st.write("Effective Price (EGP/m³) - Phase 2",st.session_state.field58*st.session_state.field59)
+            st.session_state.field60 = st.session_state.field58*st.session_state.field59
+        st.session_state.field61 = custom_number_input("RO Replacement Cost (EGP'000) - Phase 2", '61',"Enter",0.0)
+    st.button("Continue", on_click=continue_to_next_page2)
+elif st.session_state.page == 'next_page2':
+    st.markdown(
+        f'<div style="background-color: {bg_color}; color: white; padding: 5px; border-radius: 50px; margin-bottom: 15px; width: 80%; text-align: center;font-size: 36px; margin-top: -50px;" class="center-text">'
+        '<strong>WELCOME TO THE EU TAXONOMY DASHBOARD</strong>'
+        '</div>', unsafe_allow_html=True)
+    def load_lottie_url(url: str):
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.json()
+        return None
+    lottie_url1 = "https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json"  # Example URL
+    lottie_url2 = "https://lottie.host/da208e68-3a3a-48a9-b73f-17f8925cde2a/zJ0MoRmhHJ.json"
+    lottie_animation1 = load_lottie_url(lottie_url1)
+    lottie_animation2 = load_lottie_url(lottie_url2)
+    st.sidebar.header("Dashboard Navigation")
+    options = st.sidebar.radio("Select a page:", ["User Details", "Data Overview", "Charts"])
+    if options == "User Details":
+        col1,col2 = st.columns([3,5])
+        with col1:
+            st.markdown("<br><br>", unsafe_allow_html=True)
+            # st_lottie(lottie_animation1, height=350, key="home1")
+            st_lottie(lottie_animation2, height=400, key="home2")
+        with col2:
+            st.markdown(
+            f'<br><div style="background-color: #3f3f3f; color: white; padding: 10px; border-radius: 50px; width:70%; margin-bottom: 15px; font-size: 28px;text-align: center;">'
+            '<strong>USER DETAILS</strong>'
+            '</div>', unsafe_allow_html=True)
+            custom_css = """
+            <style>
+            .custom-text {
+                font-family: 'Arial', sans-serif; /* Change the font family here */
+                font-size: 24px; /* Change the text size here */
+                color: #333; /* Change the text color here */
+                background-color: #FFD700; /* Change the background color here */
+                padding: 10px; /* Add some padding if needed */
+                border-radius: 50px; /* Optional: Add rounded corners */
+                text-align: center;
+                margin-bottom: 15px;
+                width:70%;
+            }
+            </style>
+            """
+
+            # Inject the custom CSS into the Streamlit app
+            st.markdown(custom_css, unsafe_allow_html=True)
+
+            # Use HTML to display the content with custom styles
+            st.markdown(f'<div class="custom-text">Username: {st.session_state.field1}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="custom-text">Project: {st.session_state.field2}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="custom-text">Capacity: {st.session_state.field3}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="custom-text">Location: {st.session_state.field4}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="custom-text">Date: {st.session_state.field5}</div>', unsafe_allow_html=True)
+                    
+    # Data Overview page
+    elif options == "Data Overview":
+        st.title("Data Overview")
+        st_lottie(lottie_animation1, height=300, key="data_overview")
+        st.write("Here you can review detailed data insights.")
+        
+        # Display data
+    #     st.write(df)
+        
+    # # Charts page
+    # elif options == "Charts":
+    #     st.title("Charts and Visualizations")
+    #     st_lottie(lottie_animation, height=300, key="charts")
+    #     st.write("Visualize your data with charts.")
+        
+    #     # Example chart
+    #     fig, ax = plt.subplots()
+    #     ax.bar(df['Metric'], df['Value'])
+    #     ax.set_xlabel('Metric')
+    #     ax.set_ylabel('Value')
+    #     ax.set_title('Example Bar Chart')
+        
+    #     st.pyplot(fig)
+        # for i in range(6, 62):
+        #     st.write(f"Exchange Rate {i}:", st.session_state[f'field{i}'])

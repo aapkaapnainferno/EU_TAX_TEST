@@ -589,10 +589,10 @@ elif st.session_state.page == 'phase':
                 st.write("Effective Price (EGP/m³) - Phase 1",st.session_state.field30*st.session_state.field31)
                 st.session_state.field32 = st.session_state.field30*st.session_state.field31
             st.session_state.field33 = custom_number_input("RO Replacement Cost (EGP'000) - Phase 1", '33',"Enter")
-        if check_phase1:
-            st.button("Continue", on_click=continue_to_dashboard)
+        if check_phase1 and not check_phase2:
+            st.button("Continue", on_click=continue_to_dashboard,key='cont1')
         if check_phase2:
-            st.button("Continue", on_click=continue_to_phase2)
+            st.button("Continue", on_click=continue_to_phase2,key='cont2')
 elif st.session_state.page == 'phase2':
     def custom_number_input(label, key, placeholder,value=0.0):
         return st.number_input(label, key=key, step=0.01,value=value,placeholder=placeholder)
@@ -723,10 +723,8 @@ elif st.session_state.page == 'dashboard':
             </style>
             """
 
-            # Inject the custom CSS into the Streamlit app
             st.markdown(custom_css, unsafe_allow_html=True)
 
-            # Use HTML to display the content with custom styles
             st.markdown(f'<div class="custom-text">Username: {st.session_state.field1}</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="custom-text">Project: {st.session_state.field2}</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="custom-text">Capacity: {st.session_state.field3}</div>', unsafe_allow_html=True)
@@ -747,7 +745,6 @@ elif st.session_state.page == 'dashboard':
             }
             df = pd.DataFrame(data)
             
-            # Convert the DataFrame to a CSV string
             buffer = StringIO()
             df.to_csv(buffer, index=False)
             return buffer.getvalue()

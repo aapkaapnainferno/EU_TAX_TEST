@@ -533,6 +533,7 @@ elif st.session_state.page == 'phase':
     st.session_state.field100 = st.selectbox("Is your project a one phase or two phase project?", options, key='100')
     if st.session_state.field100 == "1":
         check_phase1 = True
+        check_phase2 = False
     if st.session_state.field100 == "2":
         check_phase1 = True
         check_phase2 = True

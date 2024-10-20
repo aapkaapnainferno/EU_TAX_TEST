@@ -595,12 +595,16 @@ elif st.session_state.page == 'phase':
             st.session_state.field24 = custom_percentage_input("Leakage Ratio/Losses (%) - Phase 1", '24',"Enter",95.0)
             st.session_state.field25 = custom_number_input("Labor Cost (EGP'000) - Phase 1", '25',"Enter")
             st.session_state.field26 = custom_number_input("Maintenance Costs (EGP'000) - Phase 1", '26',"Enter")
+            st.session_state.cgp1 = custom_number_input("Chlorine Gas (in LE'000s) - Phase 1",'cgp1key', "Enter",0.0)
+            st.session_state.cfltp1 = custom_number_input("Chemical for laboratory test (in LE'000s) - Phase 1",'cfltp1key', "Enter",0.0)
         with col2:
             st.session_state.field27 = custom_number_input("Environment & Performance Monitoring Costs (EGP'000) - Phase 1", '27',"Enter")
             st.session_state.field28 = custom_number_input("Maintenance Cost (EGP'000) - Phase 1", '28',"Enter")
             st.session_state.field29 = custom_number_input("Variable Cost (EGP'000) - Phase 1", '29',"Enter")
             st.session_state.field30 = custom_number_input("Energy Consumption (KW/m³) - Phase 1", '30',"Enter")
             st.session_state.field31 = custom_number_input("Energy Cost (EGP/KW) - Phase 1", '31',"Enter")
+            st.session_state.ogsgp1 = custom_number_input("Oil, Gas, Solar, and Gasoline (in LE'000s)  - Phase 1",'ogsgp1key', "Enter",0.0)
+            st.session_state.ofo1 = custom_number_input("Other Fixed Opex (in LE'000s)  - Phase 1",'ofo1key', "Enter",0.0)
             if st.session_state.field30 != 0 and st.session_state.field31 != 0:
                 st.write("Effective Price (EGP/m³) - Phase 1",st.session_state.field30*st.session_state.field31)
                 st.session_state.field32 = st.session_state.field30*st.session_state.field31
@@ -629,6 +633,14 @@ elif st.session_state.page == 'phase2':
         additional_days = int(fractional_months * 30)
         future_date += relativedelta(days=additional_days)
         return future_date
+    
+    def calculate_future_date_years(date, years):
+        whole_years = int(years)
+        fractional_years = years - whole_years
+        future_date = date + relativedelta(years=whole_years)
+        additional_days = int(fractional_years * 365)
+        future_date += relativedelta(days=additional_days)
+        return future_date
 
     st.markdown(
         f'<div style="background-color: {bg_color}; color: white; padding: 5px; border-radius: 15px; margin-bottom: 15px; width: 100%; text-align: center; font-size: 54px; margin-top: -50px;" class="center-text">'
@@ -639,15 +651,23 @@ elif st.session_state.page == 'phase2':
         f'<div style="background-color: {bg_color}; color: white; padding: 5px; border-radius: 15px; margin-bottom: 15px; width: 80%; text-align: center; font-size: 36px; margin-top: -50px;" class="center-text">'
         '<strong>Phase 2</strong>'
         '</div>', unsafe_allow_html=True)
+    st.session_state.fcp2 = custom_date_input("Financial Close - Phase 2", 'fcp2key')
     st.session_state.field35 = custom_date_input("Construction Start Date - Phase 2", '35')
     st.session_state.field36 = custom_number_input("Construction Period(in months) - Phase 2", '36', "Enter",0.0)
     if st.session_state.field36 != 0:
         st.write("Construction End Date:", calculate_future_date_months(st.session_state.field35,st.session_state.field36)) # TBC
         st.session_state.field37 = calculate_future_date_months(st.session_state.field35,st.session_state.field36)
+    st.session_state.osdp2 = custom_date_input("Operations Start Date - Phase 2", 'osdp2key')
     st.session_state.field38 = custom_number_input("Operations Period(in months) - Phase 2", '38', "Enter",0.0)
     if st.session_state.field38 != 0:
-        st.write("Operations End Date: - Phase 2", calculate_future_date_months(st.session_state.field37,st.session_state.field38)) # TBC
-        st.session_state.field39 = calculate_future_date_months(st.session_state.field37,st.session_state.field38)
+        st.session_state.oedp2 = st.write("Operations End Date: - Phase 2", calculate_future_date_years(st.session_state.osdp2,st.session_state.field38)) # TBC
+        st.session_state.oedp2 = calculate_future_date_years(st.session_state.osdp2,st.session_state.field38)
+    st.session_state.drsdp2 = custom_date_input("Debt Repayment Start Date - Phase 2", 'drsdp2key')
+    st.session_state.drtp2 = custom_number_input("Debt Repayment Tenor(in Years) - Phase 2", 'drtp2key', "Enter")
+    if st.session_state.drtp2 != 0:
+        st.session_state.dredp2 = st.write("Debt Repayment End Date: - Phase 2", calculate_future_date_years(st.session_state.drsdp2,st.session_state.drtp2)) # TBC
+        st.session_state.dredp2 = calculate_future_date_years(st.session_state.drsdp2,st.session_state.drtp2)
+    st.session_state.cepsp2 = custom_number_input("Capital Expenditure - Pre sensitivity (in LE'000s) - Phase 2", 'cepsp1key', "Enter")
     st.session_state.field40 = custom_percentage_input("Debt Ratio (%) - Phase 2", '40', "Enter",0.0) 
     st.session_state.field41 = custom_percentage_input("Equity Ratio (%) - Phase 2", '41', "Enter",0.0)
     st.session_state.field42 = custom_percentage_input("Construction Interest Rate (Base Rate %) - Phase 2", '42', "Enter",0.0) 
@@ -674,19 +694,22 @@ elif st.session_state.page == 'phase2':
         st.session_state.field52 = custom_percentage_input("Leakage Ratio/Losses (%) - Phase 2", '52',"Enter",95.0)
         st.session_state.field53 = custom_number_input("Labor Cost (EGP'000) - Phase 2", '53',"Enter",0.0)
         st.session_state.field54 = custom_number_input("Maintenance Costs (EGP'000) - Phase 2", '54',"Enter",0.0)
+        st.session_state.cgp2 = custom_number_input("Chlorine Gas (in LE'000s) - Phase 2",'cgp2key', "Enter",0.0)
+        st.session_state.cfltp2 = custom_number_input("Chemical for laboratory test (in LE'000s) - Phase 2",'cfltp2key', "Enter",0.0)
     with col2:
         st.session_state.field55 = custom_number_input("Environment & Performance Monitoring Costs (EGP'000) - Phase 2", '55',"Enter",0.0)
         st.session_state.field56 = custom_number_input("Maintenance Cost (EGP'000) - Phase 2", '56',"Enter",0.0)
         st.session_state.field57 = custom_number_input("Variable Cost (EGP'000) - Phase 2", '57',"Enter",0.0)
         st.session_state.field58 = custom_number_input("Energy Consumption (KW/m³) - Phase 2", '58',"Enter",0.0)
         st.session_state.field59 = custom_number_input("Energy Cost (EGP/KW) - Phase 2", '59',"Enter",0.0)
+        st.session_state.ogsgp2 = custom_number_input("Oil, Gas, Solar, and Gasoline (in LE'000s)  - Phase 2",'ogsgp2key', "Enter",0.0)
+        st.session_state.ofo2 = custom_number_input("Other Fixed Opex (in LE'000s)  - Phase 2",'ofo2key', "Enter",0.0)
         if st.session_state.field58 != 0 and st.session_state.field59 != 0:
             st.write("Effective Price (EGP/m³) - Phase 2",st.session_state.field58*st.session_state.field59)
             st.session_state.field60 = st.session_state.field58*st.session_state.field59
         st.session_state.field61 = custom_number_input("RO Replacement Cost (EGP'000) - Phase 2", '61',"Enter",0.0)
     col1,col2 = st.columns([1,18])
     with col1:
-        print(st.session_state.page)
         if st.session_state.page == 'phase2':
             st.button("Back", on_click=continue_to_phase)
     with col2:
@@ -745,7 +768,7 @@ elif st.session_state.page == 'dashboard':
             st.markdown(f'<div class="custom-text">Project: {st.session_state.field2}</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="custom-text">Capacity: {st.session_state.field3}</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="custom-text">Location: {st.session_state.field4}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="custom-text">Date: {st.session_state.field5}</div>', unsafe_allow_html=True)      
+            st.markdown(f'<div class="custom-text">Date: {st.session_state.field5}</div>', unsafe_allow_html=True)
     elif options == "Download Report":
         st_lottie(lottie_animation1, height=400, key="home3")
         def generate_report():

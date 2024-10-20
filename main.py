@@ -517,11 +517,19 @@ elif st.session_state.page == 'phase':
     def custom_date_input(label, key):
         return st.date_input(label, key=key)
     
-    def calculate_future_date(date, months):
+    def calculate_future_date_months(date, months):
         whole_months = int(months)
         fractional_months = months - whole_months
         future_date = date + relativedelta(months=whole_months)
         additional_days = int(fractional_months * 30)
+        future_date += relativedelta(days=additional_days)
+        return future_date
+    
+    def calculate_future_date_years(date, years):
+        whole_years = int(years)
+        fractional_years = years - whole_years
+        future_date = date + relativedelta(years=whole_years)
+        additional_days = int(fractional_years * 365)
         future_date += relativedelta(days=additional_days)
         return future_date
 
@@ -544,15 +552,23 @@ elif st.session_state.page == 'phase':
             '<strong>Phase 1</strong>'
             '</div>', unsafe_allow_html=True)
         st.session_state.field6 = custom_number_input("Exchange Rate - Phase 1", '6', "Enter")
+        st.session_state.fcp1 = custom_date_input("Financial Close - Phase 1", 'fcp1key')
         st.session_state.field7 = custom_date_input("Construction Start Date - Phase 1", '7')
         st.session_state.field8 = custom_number_input("Construction Period(in months) - Phase 1", '8', "Enter")
         if st.session_state.field8 != 0:
-            st.write("Construction End Date: - Phase 1", calculate_future_date(st.session_state.field7,st.session_state.field8)) # TBC
-            st.session_state.field9 = calculate_future_date(st.session_state.field7,st.session_state.field8)
-        st.session_state.field10 = custom_number_input("Operations Period(in months) - Phase 1", '10', "Enter")
+            st.session_state.field9 = st.write("Construction End Date: - Phase 1", calculate_future_date_months(st.session_state.field7,st.session_state.field8)) # TBC
+            st.session_state.field9 = calculate_future_date_months(st.session_state.field7,st.session_state.field8)
+        st.session_state.osdp1 = custom_date_input("Operations Start Date - Phase 1", 'osdp1key')
+        st.session_state.field10 = custom_number_input("Operations Period(in Years) - Phase 1", '10', "Enter")
         if st.session_state.field10 != 0:
-            st.session_state.field11 = st.write("Operations End Date: - Phase 1", calculate_future_date(st.session_state.field9,st.session_state.field10)) # TBC
-            st.session_state.field11 = calculate_future_date(st.session_state.field9,st.session_state.field10)
+            st.session_state.oedp1 = st.write("Operations End Date: - Phase 1", calculate_future_date_years(st.session_state.osdp1,st.session_state.field10)) # TBC
+            st.session_state.oedp1 = calculate_future_date_years(st.session_state.field9,st.session_state.field10)
+        st.session_state.drsdp1 = custom_date_input("Debt Repayment Start Date - Phase 1", 'drsdp1key')
+        st.session_state.drtp1 = custom_number_input("Debt Repayment Tenor(in Years) - Phase 1", 'drtp1key', "Enter")
+        if st.session_state.drtp1 != 0:
+            st.session_state.dredp1 = st.write("Debt Repayment End Date: - Phase 1", calculate_future_date_years(st.session_state.drsdp1,st.session_state.drtp1)) # TBC
+            st.session_state.dredp1 = calculate_future_date_years(st.session_state.drsdp1,st.session_state.drtp1)
+        st.session_state.cepsp1 = custom_number_input("Capital Expenditure - Pre sensitivity(in LE'000s) - Phase 1", 'cepsp1key', "Enter")
         st.session_state.field12 = custom_percentage_input("Debt Ratio (%) - Phase 1", '12', "Enter") 
         st.session_state.field13 = custom_percentage_input("Equity Ratio (%) - Phase 1", '13', "Enter")
         st.session_state.field14 = custom_percentage_input("Construction Interest Rate (Base Rate %) - Phase 1", '14', "Enter") 
@@ -606,7 +622,7 @@ elif st.session_state.page == 'phase2':
     def custom_date_input(label, key):
         return st.date_input(label, key=key)
     
-    def calculate_future_date(date, months):
+    def calculate_future_date_months(date, months):
         whole_months = int(months)
         fractional_months = months - whole_months
         future_date = date + relativedelta(months=whole_months)
@@ -626,12 +642,12 @@ elif st.session_state.page == 'phase2':
     st.session_state.field35 = custom_date_input("Construction Start Date - Phase 2", '35')
     st.session_state.field36 = custom_number_input("Construction Period(in months) - Phase 2", '36', "Enter",0.0)
     if st.session_state.field36 != 0:
-        st.write("Construction End Date:", calculate_future_date(st.session_state.field35,st.session_state.field36)) # TBC
-        st.session_state.field37 = calculate_future_date(st.session_state.field35,st.session_state.field36)
+        st.write("Construction End Date:", calculate_future_date_months(st.session_state.field35,st.session_state.field36)) # TBC
+        st.session_state.field37 = calculate_future_date_months(st.session_state.field35,st.session_state.field36)
     st.session_state.field38 = custom_number_input("Operations Period(in months) - Phase 2", '38', "Enter",0.0)
     if st.session_state.field38 != 0:
-        st.write("Operations End Date: - Phase 2", calculate_future_date(st.session_state.field37,st.session_state.field38)) # TBC
-        st.session_state.field39 = calculate_future_date(st.session_state.field37,st.session_state.field38)
+        st.write("Operations End Date: - Phase 2", calculate_future_date_months(st.session_state.field37,st.session_state.field38)) # TBC
+        st.session_state.field39 = calculate_future_date_months(st.session_state.field37,st.session_state.field38)
     st.session_state.field40 = custom_percentage_input("Debt Ratio (%) - Phase 2", '40', "Enter",0.0) 
     st.session_state.field41 = custom_percentage_input("Equity Ratio (%) - Phase 2", '41', "Enter",0.0)
     st.session_state.field42 = custom_percentage_input("Construction Interest Rate (Base Rate %) - Phase 2", '42', "Enter",0.0) 
